@@ -1,0 +1,71 @@
+config:
+  classPath: Gvera\Helpers\config\
+  objects:
+    config:
+      class: Config
+      singleton: true
+
+newconfig:
+  classPath: Gvera\Helpers\config\
+  objects:
+    newconfig:
+      class: Config
+
+lastconfig:
+  classPath: Gvera\Helpers\config\
+  objects:
+    lastconfig:
+      class: Config
+      arguments: "test/test/test.php"
+
+filescache:
+  classPath: Gvera\Cache\
+  objects:
+    filesCache:
+      class: FilesCache
+      arguments: "@config"
+
+testdi:
+  classPath: \Tests\
+  objects:
+    testobject:
+      class: DITestClass
+
+falsytest:
+  classPath: \Random\Random
+  objects:
+    anothertest:
+      class: AnotherTest
+
+valuetest:
+  classPath: \Tests\
+  objects:
+    testvalueconstructor:
+      class: DITestConstructorClass
+      arguments: asd
+
+doublevaluetest:
+  classPath: \Tests\
+  objects:
+    testmultiplearguments:
+      class: DITestMultipleArguments
+      arguments:
+        - asd
+        - qwe
+        - "@config"
+        - "@newconfig"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

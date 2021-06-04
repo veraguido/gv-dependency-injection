@@ -1,0 +1,39 @@
+{
+    "name": "gvera/dependency-injection",
+    "description": "gv dependency injection",
+    "license": "MIT",
+    "keywords": ["gv", "dependency injection"],
+    "authors": [
+        {
+            "name": "Guido Vera",
+            "email": "vera.a.guido@gmail.com"
+        }
+    ],
+    "config": {
+        "platform" :{
+            "php": "8.0.0"
+        }
+    },
+    "require": {
+        "gvera/exceptions": "^1.0",
+        "gvera/config": "^1.0",
+        "gvera/cache": "^1.0",
+        "psr/container": "1.0.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit":          "^8.5",
+        "pcov/clobber": "^2.0"
+    },
+    "scripts": {
+    },
+    "autoload": {
+      "psr-4": {
+        "Gvera\\": [
+            "src/"
+        ],
+          "Tests\\": [
+              "tests/"
+          ]
+      }
+    }
+}
