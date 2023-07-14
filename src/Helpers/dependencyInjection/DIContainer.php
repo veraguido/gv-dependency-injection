@@ -1,12 +1,14 @@
 <?php
 namespace Gvera\Helpers\dependencyInjection;
 
+use AllowDynamicProperties;
 use Gvera\Exceptions\ClassNotFoundInDIContainerException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use ReflectionException;
 
+#[AllowDynamicProperties]
 class DIContainer implements ContainerInterface
 {
     const SINGLETON_CLASS = 'classSingleton';
