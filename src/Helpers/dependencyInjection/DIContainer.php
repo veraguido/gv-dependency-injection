@@ -13,35 +13,36 @@ class DIContainer implements ContainerInterface
 {
     const SINGLETON_CLASS = 'classSingleton';
 
-    private $map;
+
+    private array $map;
     private $classMap;
     private array $categories = [];
 
     private function addToMap($key, $obj)
     {
-        if ($this->map === null) {
-            $this->map = (object) array();
+        if (!isset($this->map)) {
+            $this->map = [];
         }
-        $this->map->$key = $obj;
+        $this->map[$key] = $obj;
 
-        $this->classMap[$key] = $obj->value;
+        $this->classMap[$key] = $obj['value'];
     }
     public function mapClass($key, $value, $arguments = null)
     {
-        $this->addToMap($key, (object) array(
+        $this->addToMap($key, [
             "value" => $value,
-            "type" => "class",
+            "type" => 'class',
             "arguments" => $arguments
-        ));
+        ]);
     }
     public function mapClassAsSingleton($key, $value, $arguments = null)
     {
-        $this->addToMap($key, (object) array(
+        $this->addToMap($key, [
             "value" => $value,
             "type" => self::SINGLETON_CLASS,
             "instance" => null,
             "arguments" => $arguments
-        ));
+        ]);
     }
 
     public function mapCategory(array $category, $categoryName)
@@ -83,7 +84,7 @@ class DIContainer implements ContainerInterface
                 return $this->getDIarguments($argument);
             }
 
-            if (strpos($argument, "@") !== false) {
+            if (str_contains($argument, "@")) {
                 $replacedArguments[$index] = $this->get(str_replace("@", "", $argument));
             }
         }
@@ -108,18 +109,18 @@ class DIContainer implements ContainerInterface
         $this->checkClassExist($className);
         $singleton = $this->checkIfIsSingleton($id);
         if ($singleton && $this->getItemInstance($id) !== null) {
-            return $this->map->$id->instance;
+            return $this->map[$id]['instance'];
         }
 
         $reflection = new \ReflectionClass($className);
-        $arguments = isset($this->map->$id->arguments) ? $this->map->$id->arguments : [];
+        $arguments = $this->map[$id]['arguments'] ?? [];
         // creating an instance of the class
         $obj = $this->createInstanceOfNewClass($reflection, $className, $arguments);
 
         $this->checkInjection($reflection, $obj);
 
         if ($singleton) {
-            $this->map->$id->instance = $obj;
+            $this->map[$id]['instance'] = $obj;
         }
 
         // return the created instance
@@ -147,6 +148,7 @@ class DIContainer implements ContainerInterface
     /**
      * @param $lines
      * @param $object
+     * @throws ReflectionException
      */
     private function checkInjectionLinesInComments($lines, $object)
     {
@@ -158,10 +160,12 @@ class DIContainer implements ContainerInterface
     }
 
     /**
+     * @param $parts
+     * @param $object
      * @return void
      * @throws ReflectionException
      */
-    private function injectDependency($parts, $object)
+    private function injectDependency($parts, $object): void
     {
         $parts = explode(" ", $parts[1]);
         if (count($parts) > 1) {
@@ -174,7 +178,7 @@ class DIContainer implements ContainerInterface
      * @return void
      * @throws ClassNotFoundInDIContainerException
      */
-    private function checkClassExist($className)
+    private function checkClassExist($className): void
     {
         if (!class_exists($className)) {
             throw new ClassNotFoundInDIContainerException("DI: missing class $className", array($className));
@@ -186,20 +190,20 @@ class DIContainer implements ContainerInterface
      * @param $dependencies
      * @throws ReflectionException
      */
-    private function generateObjectDependencies($object, $dependencies)
+    private function generateObjectDependencies($object, $dependencies): void
     {
         $key = $dependencies[1];
         $key = str_replace("\n", "", $key);
         $key = str_replace("\r", "", $key);
 
-        if (!isset($this->map->$key)) {
+        if (!isset($this->map[$key])) {
             return;
         }
 
-        $id = array_search($this->map->$key->value, $this->classMap);
-        $this->generateResource($id, $key, $object, $this->map->$key->type);
+        $id = array_search($this->map[$key]['value'], $this->classMap);
+        $this->generateResource($id, $key, $object, $this->map[$key]['type']);
 
-        $object->$key = $this->map->$key->instance;
+        $object->$key = $this->map[$key]['instance'];
     }
 
     /**
@@ -209,10 +213,10 @@ class DIContainer implements ContainerInterface
      * @param $type
      * @throws ReflectionException
      */
-    private function generateResource($id, $key, $object, $type)
+    private function generateResource($id, $key, $object, $type): void
     {
         if ($type === "value") {
-            $object->$key = $this->map->$key->value;
+            $object->$key = $this->map[$key]['value'];
             return;
         }
 
@@ -246,8 +250,8 @@ class DIContainer implements ContainerInterface
      */
     private function generateSingletonDependency($key, $id)
     {
-        if ($this->map->$key->instance === null) {
-            $this->map->$key->instance = $this->get($id);
+        if ($this->map[$key]['instance'] === null) {
+            $this->map[$key]['instance'] = $this->get($id);
         }
     }
 
@@ -275,7 +279,7 @@ class DIContainer implements ContainerInterface
 
     private function checkIfIsSingleton($id)
     {
-        return self::SINGLETON_CLASS === $this->map->$id->type;
+        return self::SINGLETON_CLASS === $this->map[$id]['type'];
     }
 
     /**
@@ -284,7 +288,7 @@ class DIContainer implements ContainerInterface
      */
     private function getItemInstance($id)
     {
-        return $this->map->$id->instance;
+        return $this->map[$id]['instance'];
     }
 
     /**
